@@ -7,7 +7,7 @@
 import * as ZapparThree from '@zappar/zappar-threejs';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import model from '../assets/girland.glb';
+import model from '../assets/box.glb';
 import target from '../assets/image.zpt';
 import './index.sass';
 import { Event1 } from '@zappar/zappar';
@@ -77,9 +77,7 @@ scene.add(imageTrackerGroup);
 // Since we're using webpack, we can use the 'file-loader' to make sure these assets are
 // automatically included in our output folder
 
-let action: THREE.AnimationAction;
 let mixer: THREE.AnimationMixer;
-let pushed = false;
 let funcAction = () => {};
 imageTrackerGroup
 // Load a 3D model to place within our group (using ThreeJS's GLTF loader)
@@ -93,9 +91,6 @@ gltfLoader.load(model, (gltf) => {
     color: 0x00FF19
   })
   gltf.scene.visible = false;
-  for (var i = 3; i < 26; ++i) {
-    (gltf.scene.children[i] as THREE.Mesh).material = material;
-  }
   console.log(gltf.scene.children)
   const a = new Event1<ZapparThree.ImageAnchor>();
   a.bind(() => {
@@ -110,31 +105,13 @@ gltfLoader.load(model, (gltf) => {
   // get the animation and re-declare mixer and action.
   // which will then be triggered on button press
   mixer = new THREE.AnimationMixer(gltf.scene);
-  funcAction = () => {
-    for (var i = 3; i < 26; ++i) {
-      (gltf.scene.children[i] as THREE.Mesh).material = !pushed ? redMaterial : material; 
-    }
-    pushed = !pushed;
-  }
   // Now the model has been loaded, we can roate it and add it to our image_tracker_group
   imageTrackerGroup.add(gltf.scene.rotateY(Math.PI / 2));
 }, undefined, () => {
 });
 // Light up our scene with an ambient light
 imageTrackerGroup.add(new THREE.AmbientLight(0xffffff));
-
-// Create a new div element on the document
-const button = document.createElement('div');
-
-button.setAttribute('class', 'circle');
-
-// On click, play the gltf's action
-button.onclick = () => { 
-  funcAction();
-};
-
 // Append the button to our document's body
-document.body.appendChild(button);
 
 // When we lose sight of the camera, hide the scene contents.
 imageTracker.onVisible.bind(() => { scene.visible = true; });
